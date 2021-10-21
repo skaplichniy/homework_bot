@@ -41,8 +41,8 @@ def get_api_answer(url, current_timestamp):
         logging.exception(error)
         raise Exception('Что-то пошло не так')
     try:
-        if homework_statuses.status_code != 200: 
-            logging.error('Что-то пошло не так', homework_statuses) 
+        if homework_statuses.status_code != 200:
+            logging.error('Что-то пошло не так', homework_statuses)
             raise Exception('Что-то пошло не так')
         return homework_statuses.json()
     except requests.exceptions.RequestException as error:
@@ -67,7 +67,7 @@ def check_response(response):
             return homeworks
         # если убрать else, то pytest падает :(
         else:
-            logging.error('Нет статуса', status) 
+            logging.error('Нет статуса', status)
             raise Exception('Нет статуса')
     return homeworks
 
