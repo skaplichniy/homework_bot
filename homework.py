@@ -91,7 +91,7 @@ def main():
         except Exception as error:
             logging.error(error)
             bot.send_message(
-                chat_id=TELEGRAM_CHAT_ID, text=f'Сбой в работе программы: {error}'
+                chat_id=TELEGRAM_CHAT_ID, text=f'Сбой в работе: {error}'
             )
             time.sleep(RETRY_TIME)
 
