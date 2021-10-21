@@ -4,12 +4,14 @@ import telegram
 import time
 from dotenv import load_dotenv
 import os
+import json
 
 load_dotenv()
 
 PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
-CHAT_ID = os.getenv('CHAT_ID')
+TELEGRAM_CHAT_ID = os.getenv('CHAT_ID')
+# Не совсем понял, для чего добавлять префиксы? Они ведь и так есть
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -29,7 +31,7 @@ HEADERS = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
 
 def send_message(bot, message):
     """Отправляем сообщение."""
-    return bot.send_message(chat_id=CHAT_ID, text=message)
+    return bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
 
 
 def get_api_answer(url, current_timestamp):
@@ -40,12 +42,12 @@ def get_api_answer(url, current_timestamp):
     except requests.exceptions.RequestException as error:
         logging.exception(error)
         raise Exception('Что-то пошло не так')
+
+    if homework_statuses.status_code != 200:
+        logging.error('Что-то пошло не так', homework_statuses)
     try:
-        if homework_statuses.status_code != 200:
-            logging.error('Что-то пошло не так', homework_statuses)
-            raise Exception('Что-то пошло не так')
         return homework_statuses.json()
-    except requests.exceptions.RequestException as error:
+    except json.JSONDecodeError as error:
         logging.exception(error)
         raise Exception('Что-то пошло не так')
 
@@ -65,7 +67,6 @@ def check_response(response):
         status = homework.get('status')
         if status in HOMEWORK_STATUSES:
             return homeworks
-        # если убрать else, то pytest падает :(
         else:
             logging.error('Нет статуса', status)
             raise Exception('Нет статуса')
@@ -90,10 +91,9 @@ def main():
         except Exception as error:
             logging.error(error)
             bot.send_message(
-                chat_id=CHAT_ID, text=f'Сбой в работе программы: {error}'
+                chat_id=TELEGRAM_CHAT_ID, text=f'Сбой в работе программы: {error}'
             )
             time.sleep(RETRY_TIME)
-            continue
 
 
 if __name__ == '__main__':
