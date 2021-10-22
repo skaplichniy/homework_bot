@@ -40,7 +40,7 @@ def send_message(bot, message):
 def get_api_answer(url, current_timestamp):
     """Забираем информацию с апи."""
     try:
-        payload = {'from_date': 1}
+        payload = {'from_date': current_timestamp}
         homework_statuses = requests.get(url, 
             headers=PRACTICUM_HEADERS, params=payload)
     except requests.exceptions.RequestException as error:
