@@ -17,7 +17,8 @@ logging.basicConfig(
     level=logging.INFO)
 
 PRACTICUM_RETRY_TIME = 300
-PRACTICUM_ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
+PRACTICUM_ENDPOINT = 'https://practicum.yandex.ru/api/'\
+                     'user_api/homework_statuses/'
 
 PRACTICUM_HOMEWORK_STATUSES = {
     'approved': 'Работа проверена: ревьюеру всё понравилось. Ура!',
@@ -40,9 +41,9 @@ def send_message(bot, message):
 def get_api_answer(url, current_timestamp):
     """Забираем информацию с апи."""
     try:
-        payload = {'from_date': current_timestamp}
-        homework_statuses = requests.get(url, 
-            headers=PRACTICUM_HEADERS, params=payload)
+        payload = {'from_date': 1}
+        homework_statuses = requests.get(
+            url, headers=PRACTICUM_HEADERS, params=payload)
     except requests.exceptions.RequestException as error:
         logging.exception(error)
         raise Exception('Практикум не отдаёт информацию')
