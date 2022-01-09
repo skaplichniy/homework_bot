@@ -21,65 +21,65 @@ PRACTICUM_ENDPOINT = 'https://practicum.yandex.ru/api/'\
                      'user_api/homework_statuses/'
 
 PRACTICUM_HOMEWORK_STATUSES = {
-    'approved': 'Работа проверена: ревьюеру всё понравилось. Ура!',
-    'reviewing': 'Работа взята на проверку ревьюером.',
-    'rejected': 'Работа проверена, в ней нашлись ошибки.'
+    'approved': 'Hooray! Your homework is checked and everything is cool!',
+    'reviewing': 'The tutor started to review your homework',
+    'rejected': 'Ooooops! There are some mistakes in your homework. Please, fix it'
 }
 
 PRACTICUM_HEADERS = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
 
 
 def send_message(bot, message):
-    """Отправляем сообщение."""
+    """Sending message."""
     try:
         return bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
     except requests.exceptions.RequestException as error:
         logging.exception(error)
-        raise Exception('Проблема с Телеграмом')
+        raise Exception('Something wrong with Telegram')
 
 
 def get_api_answer(url, current_timestamp):
-    """Забираем информацию с апи."""
+    """Check the API."""
     try:
         payload = {'from_date': current_timestamp}
         homework_statuses = requests.get(
             url, headers=PRACTICUM_HEADERS, params=payload)
     except requests.exceptions.RequestException as error:
         logging.exception(error)
-        raise Exception('Практикум не отдаёт информацию')
+        raise Exception('No data from Practicum')
 
     if homework_statuses.status_code != 200:
-        logging.error('Ошибка в статусе', homework_statuses)
+        logging.error('Status mistake', homework_statuses)
     try:
         return homework_statuses.json()
     except json.JSONDecodeError as error:
         logging.exception(error)
-        raise Exception('Не удалось распознать информацию от Практикума')
+        raise Exception('Something wrong with the server')
 
 
 def parse_status(homework):
-    """Вытаскиваем статус д/з."""
+    """Chech the status"""
     verdict = PRACTICUM_HOMEWORK_STATUSES.get(homework['status'])
     homework_name = homework['homework_name']
 
-    return f'Изменился статус проверки работы "{homework_name}". {verdict}'
+    return f'The status has changed: "{homework_name}". {verdict}'
 
 
 def check_response(response):
-    """Проверяем всё ли ок."""
+    """Check if everything is ok"""
     homeworks = response.get('homeworks')
     for homework in homeworks:
         status = homework.get('status')
         if status in PRACTICUM_HOMEWORK_STATUSES:
             return homeworks
         else:
-            logging.error('Нет статуса', status)
-            raise Exception('Нет статуса')
+            logging.error('No status', status)
+            raise Exception('No status')
     return homeworks
 
 
 def main():
-    """Работа бота."""
+    """Bot."""
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
     while True:
@@ -96,7 +96,7 @@ def main():
         except Exception as error:
             logging.error(error)
             bot.send_message(
-                chat_id=TELEGRAM_CHAT_ID, text=f'Сбой в работе: {error}'
+                chat_id=TELEGRAM_CHAT_ID, text=f'Something went wrong: {error}'
             )
             time.sleep(PRACTICUM_RETRY_TIME)
 
